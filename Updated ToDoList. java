@@ -1,0 +1,132 @@
+import java.io.*;
+import java.util.*;
+
+public class ToDoList {
+    private static final String FILE_NAME = "tasks.txt";
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n==== To-Do List ====");
+            System.out.println("1. Add Task");
+            System.out.println("2. View Tasks");
+            System.out.println("3. Mark Task as Completed");
+            System.out.println("4. Delete Task");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Task: ");
+                    String task = scanner.nextLine();
+                    addTask(task);
+                    break;
+                case 2:
+                    viewTasks();
+                    break;
+                case 3:
+                    System.out.print("Enter Task Number to Mark as Completed: ");
+                    int taskNum = scanner.nextInt();
+                    markTaskCompleted(taskNum);
+                    break;
+                case 4:
+                    System.out.print("Enter Task Number to Delete: ");
+                    int deleteNum = scanner.nextInt();
+                    deleteTask(deleteNum);
+                    break;
+                case 5:
+                    System.out.println("Exiting... Goodbye!");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice! Please select a valid option.");
+            }
+        }
+    }
+
+    private static void addTask(String task) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
+            writer.write(task + ",Pending\n");
+            System.out.println("Task added successfully!");
+        } catch (IOException e) {
+            System.out.println("Error saving task: " + e.getMessage());
+        }
+    }
+
+    private static void viewTasks() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            int count = 1;
+            System.out.println("\n=== Task List ===");
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                System.out.println(count + ". " + parts[0] + " [" + parts[1] + "]");
+                count++;
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading tasks: " + e.getMessage());
+        }
+    }
+
+    private static void markTaskCompleted(int taskNum) {
+        List<String> tasks = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                tasks.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading tasks: " + e.getMessage());
+            return;
+        }
+
+        if (taskNum <= 0 || taskNum > tasks.size()) {
+            System.out.println("Invalid task number!");
+            return;
+        }
+
+        String[] parts = tasks.get(taskNum - 1).split(",");
+        tasks.set(taskNum - 1, parts[0] + ",Completed");
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (String task : tasks) {
+                writer.write(task + "\n");
+            }
+            System.out.println("Task marked as completed!");
+        } catch (IOException e) {
+            System.out.println("Error updating task: " + e.getMessage());
+        }
+    }
+
+    private static void deleteTask(int taskNum) {
+        List<String> tasks = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                tasks.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading tasks: " + e.getMessage());
+            return;
+        }
+
+        if (taskNum <= 0 || taskNum > tasks.size()) {
+            System.out.println("Invalid task number!");
+            return;
+        }
+
+        tasks.remove(taskNum - 1);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (String task : tasks) {
+                writer.write(task + "\n");
+            }
+            System.out.println("Task deleted successfully!");
+        } catch (IOException e) {
+            System.out.println("Error updating tasks: " + e.getMessage());
+        }
+    }
+}
